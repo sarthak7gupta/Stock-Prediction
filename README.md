@@ -37,5 +37,5 @@ python setup.py
 
 ## Get Stock Price data manually and store in db
 ```
-python data_service.py  # or Import from dump: gunzip dump.sql.gz | mysql -u root -p capstone
+python data_service.py  # or Import from dump: gunzip database/dump.sql.gz; cat database/dump.sql | mysql -h 127.0.0.1 -P 3306 -u root -D capstone -p
 ```
