@@ -21,8 +21,9 @@ pip install -r requirements.txt
 sudo apt install -y docker mysql-client
 ```
 
-### Run MySQL locally. Create required tables and directories with setup.py
+### Run MongoDB and MySQL locally. Create required tables and directories with setup.py
 ```
+sudo docker run --name mongo -d -p 27017:27017 mongo
 sudo docker run --name mysql -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=root -e MYSQL_PASSWORD=root mysql/mysql-server
 sudo docker exec -it mysql mysql -u root -p
 GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;
