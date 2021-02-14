@@ -11,7 +11,7 @@ from config import Config
 from log_helper import logging
 
 logger = logging.getLogger("default")
-sql_config = Config.SQLALCHEMY
+sql_config = Config.SQLALCHEMY["mysql"]
 db_uri = url.URL(**sql_config)
 
 _autocommit = False
@@ -24,8 +24,8 @@ def get_engine(db_uri) -> Engine:
 
 def get_session(db_uri, autocommit, autoflush) -> Session:
     engine = get_engine(db_uri)
-    Session = scoped_session(sessionmaker(bind=engine, autocommit=autocommit, autoflush=autoflush))
-    return Session()
+    session_factory = scoped_session(sessionmaker(bind=engine, autocommit=autocommit, autoflush=autoflush))
+    return session_factory()
 
 
 @contextmanager
@@ -46,11 +46,3 @@ def session_scope(
 
     finally:
         session.close()
-
-
-# def get_or_create(session, model, params, **kwargs):
-#     instance = session.query(model).filter_by(params).first()
-#     if not instance:
-#         session.add(model(**kwargs))
-#         session.commit()
-#     return instance

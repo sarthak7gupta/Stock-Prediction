@@ -17,21 +17,31 @@ cd Stock-Prediction
 
 pip install -U pip
 pip install -r requirements.txt
-
-sudo apt install -y docker mysql-client
 ```
+
+`sudo apt install -y docker mysql-client` or `sudo apt install -y postgresql-client`
 
 ### Run MongoDB and MySQL locally. Create required tables and directories with setup.py
 ```
 sudo docker run --name mongo -d -p 27017:27017 mongo
-sudo docker run --name mysql -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=root -e MYSQL_PASSWORD=root mysql/mysql-server
+```
+`sudo docker run --name mysql -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=root -e MYSQL_PASSWORD=root mysql/mysql-server` or `sudo docker run --name postgres -d -p 5432:5432 -e POSTGRES_PASSWORD=root -e POSTGRES_USER=root postgres`
+
+```
 sudo docker exec -it mysql mysql -u root -p
 GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;
 exit;
 mysql -h 127.0.0.1 -P 3306 -u root -p
 exit;
+```
+or
+```
+sudo docker exec -it postgres psql -h localhost -p 5432 -U root -W
+psql -h localhost -p 5432 -U root -W
+exit;
+```
 
-export MYSQL_PASSWORD=root
+`export MYSQL_PASSWORD=root` or `export POSTGRES_PASSWORD=root`
 python teardown.py
 python setup.py
 ```

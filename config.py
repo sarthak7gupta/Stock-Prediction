@@ -25,12 +25,22 @@ class Config:
         ),
     }
     SQLALCHEMY = {
-        "drivername": "mysql+pymysql",
-        "username": "root",
-        "password": getenv("MYSQL_PASSWORD"),
-        "host": "127.0.0.1",
-        "port": 3306,
-        "database": "capstone",
+        "mysql": {
+            "drivername": "mysql+pymysql",
+            "username": "root",
+            "password": getenv("MYSQL_PASSWORD"),
+            "host": "127.0.0.1",
+            "port": 3306,
+            "database": "capstone",
+        },
+        "psql": {
+            "drivername": "postgres",
+            "username": "root",
+            "password": getenv("POSTGRES_PASSWORD"),
+            "host": "localhost",
+            "port": 5432,
+            "database": "capstone",
+        }
     }
     BASEDIR = "data"
     PATHS = {
