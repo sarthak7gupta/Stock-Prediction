@@ -50,3 +50,8 @@ python setup.py
 ```
 python data_service.py  # or Import from dump: gunzip database/dump.sql.gz; cat database/dump.sql | mysql -h 127.0.0.1 -P 3306 -u root -D capstone -p
 ```
+
+## Get Articles data manually and store in db
+```
+python article_service.py  # or Import from dump: mongoimport --db capstone --collection feeds database/feeds.json --jsonArray; mongoimport --db capstone --collection entries database/entries.json --jsonArray
+```

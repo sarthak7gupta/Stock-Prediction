@@ -4,7 +4,7 @@ from shutil import rmtree
 from sqlalchemy_utils import database_exists
 
 from config import Config
-from database.Model import Base
+from database.SQLModel import Base
 from db_helper import db_uri, get_engine
 
 paths = Config.PATHS

@@ -10,7 +10,8 @@ from pandas.errors import EmptyDataError
 from tqdm import tqdm
 
 from config import Config
-from database.Model import StockPrice
+from database.SQLModel import StockPrice
+# from database.NoSQLModel import StockPrice
 from db_helper import session_scope
 from log_helper import logging
 

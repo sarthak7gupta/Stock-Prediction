@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from typing import Generator
 
+from mongoengine import connect, disconnect
 from sqlalchemy import create_engine
 from sqlalchemy.engine import url
 from sqlalchemy.engine.base import Engine
@@ -11,9 +12,9 @@ from config import Config
 from log_helper import logging
 
 logger = logging.getLogger("default")
+mongo_db = Config.MONGODB
 sql_config = Config.SQLALCHEMY["mysql"]
 db_uri = url.URL(**sql_config)
-
 _autocommit = False
 _autoflush = True
 
@@ -32,17 +33,26 @@ def get_session(db_uri, autocommit, autoflush) -> Session:
 def session_scope(
     db_uri=db_uri, autocommit=_autocommit, autoflush=_autoflush
 ) -> Generator[Session, None, None]:
-    session = get_session(db_uri, autocommit, autoflush)
+    session = None
 
     try:
+        session = get_session(db_uri, autocommit, autoflush)
         yield session
         if not autocommit:
             session.commit()
 
     except Exception as e:
-        session.rollback()
+        if session: session.rollback()
         logger.error(f"DB error {e}")
         raise e
 
     finally:
-        session.close()
+        if session: session.close()
+
+
+def connect_mongo():
+    try:
+        return connect(mongo_db)
+
+    except Exception as e:
+        logger.error(f"Couldn't connect to MongoDB. {e}")

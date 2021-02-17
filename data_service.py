@@ -4,7 +4,7 @@ import pandas_market_calendars as mcal
 from dateutil.relativedelta import relativedelta
 
 from config import Config
-from database.Model import Stock
+from database.SQLModel import Stock
 from db_helper import session_scope
 from helper import countdown, fetch_and_store_csv, store_db
 from log_helper import logging
