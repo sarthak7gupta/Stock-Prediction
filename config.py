@@ -75,7 +75,7 @@ class Config:
             "module": "data_service",
             "function": "run_service",
             "trigger": "cron",
-            "job_kwargs": {"hour": 17, "minute": 30},
+            "job_kwargs": {"hour": 22, "minute": 30},
         },
         "article_fetch": {
             "module": "article_service",

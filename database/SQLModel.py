@@ -83,7 +83,7 @@ class StockPrice(Base):
 
 
 @event.listens_for(StockPrice, "after_insert")
-def increment_players_number(mapper, connection, price):
+def update_latest_date(mapper, connection, price):
     stocks_table = Stock.__table__
     connection.execute(
         stocks_table.update()

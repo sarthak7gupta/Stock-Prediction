@@ -45,14 +45,14 @@ def run_service():
                     dates_to_fetch := indian_trading_calendar.schedule(from_date, to_date)).empty:
                 continue
 
-            if dates_to_fetch.market_close.max() + relativedelta(hours=2) < datetime.now(tz=tz):
+            if dates_to_fetch.market_close.max() + relativedelta(hours=2) > datetime.now(tz=tz):
                 to_date -= relativedelta(days=1)
 
             if from_date > to_date or (
                     dates_to_fetch := indian_trading_calendar.schedule(from_date, to_date)).empty:
                 continue
 
-            num_attempts, cooldown_time = 2, 3
+            num_attempts, cooldown_time = 3, 5
             for attempt in range(1, num_attempts + 1):
                 countdown(cooldown_time)
                 logger.info(f"\nAttempt {attempt}/{num_attempts}. Fetching {name} data from " +
