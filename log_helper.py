@@ -17,7 +17,7 @@ class LoggerConfig:
                 "format": "[%(levelname)s] %(message)s",
             },
         },
-        "handlers": {
+        "handlers": {**{
             logkey: {
                 "level": logconfig["level"],
                 "formatter": "default",
@@ -27,14 +27,14 @@ class LoggerConfig:
                 "backupCount": 5,
             }
             for logkey, logconfig in logconfigs.items()
-        } | {
+        }, **{
             "console": {
                 "class": "logging.StreamHandler",
                 "level": "INFO",
                 "formatter": "console",
                 "stream": "ext://sys.stdout",
             }
-        },
+        }},
         "loggers": {
             logkey: {"level": logconfig["level"], "handlers": ["console", logkey]}
             for logkey, logconfig in logconfigs.items()

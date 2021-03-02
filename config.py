@@ -25,15 +25,15 @@ class Config:
         ),
     }
     SQLALCHEMY = {
-        "mysql": {
+        "MYSQL": {
             "drivername": "mysql+pymysql",
             "username": "root",
-            "password": getenv("MYSQL_PASSWORD"),
+            "password": getenv("MYSQL_PASSWORD", "root"),
             "host": "127.0.0.1",
             "port": 3306,
             "database": "capstone",
         },
-        "psql": {
+        "POSTGRES": {
             "drivername": "postgres",
             "username": "root",
             "password": getenv("POSTGRES_PASSWORD"),
@@ -75,13 +75,13 @@ class Config:
             "module": "data_service",
             "function": "run_service",
             "trigger": "cron",
-            "job_kwargs": {"hour": 22, "minute": 30},
+            "job_kwargs": {"hour": "6,22", "minute": 30},
         },
         "article_fetch": {
             "module": "article_service",
             "function": "run_service",
             "trigger": "cron",
-            "job_kwargs": {"hour": 20, "minute": 30},
+            "job_kwargs": {"minute": "0/15"},
         }
     }
     CRONPIDFILE = "/tmp/cron_pid"

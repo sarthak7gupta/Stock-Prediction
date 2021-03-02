@@ -68,9 +68,6 @@ class Daemon:
         os.remove(self.pidfile)
 
     def start(self):
-        """
-        Start the daemon
-        """
         # Check for a pidfile to see if the daemon already runs
         try:
             with open(self.pidfile, "r") as pf:
@@ -87,9 +84,6 @@ class Daemon:
         self.run()
 
     def stop(self):
-        """
-        Stop the daemon
-        """
         # Get the pid from the pidfile
         try:
             pf = open(self.pidfile, "r")
@@ -119,9 +113,6 @@ class Daemon:
                 sys.exit(1)
 
     def restart(self):
-        """
-        Restart the daemon
-        """
         self.stop()
         self.start()
 

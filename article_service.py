@@ -10,6 +10,7 @@ from tqdm import tqdm
 from config import Config
 from database.NoSQLModel import Article, Entry, Feed
 from db_helper import connect_mongo
+from sentiment import classify
 
 logger = logging.getLogger("fetch")
 
@@ -21,7 +22,7 @@ connect_mongo()
 def run_service():
     n = len(urls)
     logger.info(f"Fetching from {n} RSS Feeds\n")
-    for i, (key, url) in enumerate(urls.items()):
+    for i, (key, url) in enumerate(urls.items(), 1):
         logger.info(f"{i}/{n} Fetching {key} feed...")
 
         try:
@@ -45,11 +46,12 @@ def run_service():
             )
 
             if feed:
-                if feed.last_updated > last_updated:
+                if feed.last_updated < last_updated:
                     feed.update(set__title=title)
                     feed.update(set__subtitle=subtitle)
                     feed.update(set__generator=generator)
                     feed.update(set__last_updated=last_updated)
+
                 else:
                     continue
 
@@ -95,6 +97,8 @@ def run_service():
                 a.parse()
                 a.nlp()
 
+                sentiment = classify(a.text)
+
                 if a.summary == "you are here:":
                     continue
 
@@ -114,6 +118,7 @@ def run_service():
                     published=published,
                     feed=feed_ref,
                     article=article,
+                    sentiment=sentiment,
                 )
 
                 feed.entries.append(entry.to_dbref())

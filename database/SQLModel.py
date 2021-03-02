@@ -1,6 +1,6 @@
 from datetime import date as dt_date
 
-from sqlalchemy import (BOOLEAN, BigInteger, Column, Date, DateTime, Float, ForeignKey,
+from sqlalchemy import (Boolean, BigInteger, Column, Date, DateTime, Float, ForeignKey,
                         String, UniqueConstraint, event, func)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -13,7 +13,7 @@ class Stock(Base):
     id = Column("id", BigInteger, autoincrement=True, primary_key=True)
     name = Column("name", String(64), nullable=False)
     symbol = Column("symbol", String(24), nullable=False)
-    is_index = Column("is_index", BOOLEAN, server_default="0")
+    is_index = Column("is_index", Boolean, server_default="0")
     latest_date = Column("latest_date", Date)
     created_at = Column("created_at", DateTime, server_default=func.now())
     updated_at = Column("updated_at", DateTime, server_default=func.now(), onupdate=func.now())
@@ -28,8 +28,14 @@ class Stock(Base):
         self.is_index = is_index
 
     def __repr__(self) -> str:
-        return f"<{'Index' if self.is_index else 'Stock'}> {{id: {self.id}, name: {self.name}, " + \
-            f"symbol: {self.symbol}, latest_date: {self.latest_date}" + "}"
+        return str({
+            'Index' if self.is_index else 'Stock': {
+                "id": self.id,
+                "name": self.name,
+                "symbol": self.symbol,
+                "latest_date": self.latest_date,
+            }
+        })
 
 
 class StockPrice(Base):
@@ -76,10 +82,20 @@ class StockPrice(Base):
         self.deliverable_volume = deliverable_volume
 
     def __repr__(self) -> str:
-        return f"<StockPrice> {{date: {self.date}, stock id: {self.stock_id}, " + \
-            f"open: {self.open_price}, high: {self.high_price}, low: {self.low_price}, " + \
-            f"close: {self.close_price}, vwap: {self.vwa_price}, volume: {self.volume}, " + \
-            f"trades: {self.trades}, deliverable volume: {self.deliverable_volume}}}"
+        return str({
+            "StockPrice": {
+                "date": self.date,
+                "stock id": self.stock_id,
+                "open": self.open_price,
+                "high": self.high_price,
+                "low": self.low_price,
+                "close": self.close_price,
+                "vwap": self.vwa_price,
+                "volume": self.volume,
+                "trades": self.trades,
+                "deliverable volume": self.deliverable_volume,
+            }
+        })
 
 
 @event.listens_for(StockPrice, "after_insert")
@@ -90,3 +106,39 @@ def update_latest_date(mapper, connection, price):
         .where(stocks_table.c.id == price.stock_id)
         .values(latest_date=price.date)
     )
+
+
+class StockPrediction(Base):
+    __tablename__ = "stock_predictions"
+    id = Column("id", BigInteger, autoincrement=True, primary_key=True)
+    date = Column("date", Date, nullable=False)
+    stock_id = Column(BigInteger, ForeignKey("stocks.id", ondelete="CASCADE"), nullable=False)
+    predicted_price = Column(Float(5), nullable=False)
+    predictor_model = Column(String(48), nullable=False)
+    prediction_as_of = Column(Date)
+    created_at = Column("created_at", DateTime, server_default=func.now(), nullable=False)
+
+    def __init__(
+        self,
+        date: dt_date,
+        stock_id: int,
+        predicted_price: float,
+        predictor_model: str,
+        prediction_as_of: dt_date = None,
+    ):
+        self.date = date
+        self.stock_id = stock_id
+        self.predicted_price = predicted_price
+        self.predictor_model = predictor_model
+        self.prediction_as_of = prediction_as_of
+
+    def __repr__(self) -> str:
+        return str({
+            "StockPrediction": {
+                "date": self.date,
+                "stock_id": self.stock_id,
+                "predicted price": self.predicted_price,
+                "predictor model": self.predictor_model,
+                "prediction_as_of": self.prediction_as_of,
+            }
+        })
