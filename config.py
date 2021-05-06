@@ -77,12 +77,12 @@ class Config:
             "trigger": "cron",
             "job_kwargs": {"hour": "6,22", "minute": 30},
         },
-        "article_fetch": {
-            "module": "article_service",
+        "train_models": {
+            "module": "train_models",
             "function": "run_service",
             "trigger": "cron",
-            "job_kwargs": {"minute": "0/15"},
-        }
+            "job_kwargs": {"hour": 3, "minute": 0},
+        },
     }
     CRONPIDFILE = "/tmp/cron_pid"
     MONGODB = "capstone"

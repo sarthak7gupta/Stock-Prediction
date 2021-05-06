@@ -1,9 +1,12 @@
+from os import makedirs
 import logging
 import logging.config
 
 from config import Config
 
 logconfigs = Config.LOGS
+logfolder = "logs"
+makedirs(logfolder, exist_ok=True)
 
 
 class LoggerConfig:
@@ -22,7 +25,7 @@ class LoggerConfig:
                 "level": logconfig["level"],
                 "formatter": "default",
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": logconfig["filename"],
+                "filename": f"{logfolder}/{logconfig['filename']}",
                 "maxBytes": 1000000,
                 "backupCount": 5,
             }

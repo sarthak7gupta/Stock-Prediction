@@ -1,6 +1,6 @@
 from datetime import date as dt_date
 
-from sqlalchemy import (Boolean, BigInteger, Column, Date, DateTime, Float, ForeignKey,
+from sqlalchemy import (Boolean, BigInteger, Column, Date, DateTime, DECIMAL, ForeignKey,
                         String, UniqueConstraint, event, func)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -43,11 +43,11 @@ class StockPrice(Base):
     id = Column("id", BigInteger, autoincrement=True, primary_key=True)
     date = Column("date", Date, nullable=False)
     stock_id = Column(BigInteger, ForeignKey("stocks.id", ondelete="CASCADE"), nullable=False)
-    open_price = Column(Float(5))
-    high_price = Column(Float(5))
-    low_price = Column(Float(5))
-    close_price = Column(Float(5))
-    vwa_price = Column(Float(5))
+    open_price = Column(DECIMAL(12, 5))
+    high_price = Column(DECIMAL(12, 5))
+    low_price = Column(DECIMAL(12, 5))
+    close_price = Column(DECIMAL(12, 5))
+    vwa_price = Column(DECIMAL(12, 5))
     volume = Column(BigInteger)
     trades = Column(BigInteger)
     deliverable_volume = Column(BigInteger)
@@ -113,7 +113,7 @@ class StockPrediction(Base):
     id = Column("id", BigInteger, autoincrement=True, primary_key=True)
     date = Column("date", Date, nullable=False)
     stock_id = Column(BigInteger, ForeignKey("stocks.id", ondelete="CASCADE"), nullable=False)
-    predicted_price = Column(Float(5), nullable=False)
+    predicted_price = Column(DECIMAL(12, 5), nullable=False)
     predictor_model = Column(String(48), nullable=False)
     prediction_as_of = Column(Date)
     created_at = Column("created_at", DateTime, server_default=func.now(), nullable=False)

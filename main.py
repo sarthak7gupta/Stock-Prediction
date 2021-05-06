@@ -1,54 +1,47 @@
 # %%
 import math
-# from random import choice
 
 import matplotlib.pyplot as plt
 import numpy as np
 from pandas import DataFrame, Series
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.preprocessing import StandardScaler
 
 from arima import ARIMA
 from helper import (LogScaler, MinMaxScaler, StockHelper,
                     get_next_n_trading_days, save_predictions)
 from lstm import LSTM
 from svm import SVM
-from hmm import HMM
 
 # %%
 stocks = StockHelper.get_stock_symbol_mapping()
-# stock, symbol = choice(list(stocks.items()))
-stock, symbol = "State Bank", "SBIN"
+mylist = list(stocks.items())
+stock, symbol = mylist[11]
 
 # %%
 total_days = 300
-train_size = 0.9
+train_size = 0.95
 testing = train_size != 1
+save_model = False
+to_save_predictions = False
 
 # %%
 # model_name = "SVM"
-model_name = "HMM"
-# mode_name = "ARIMA"
+model_name = "ARIMA"
 # model_name = "LSTM"
 
 if model_name == "ARIMA":
-    model = ARIMA(symbol, total_days, train_size, scaler=LogScaler)
+    model = ARIMA(symbol, total_days, train_size, scaler=LogScaler, save_model=save_model)
 
 elif model_name == "LSTM":
-    model = LSTM(symbol, total_days, train_size, scaler=MinMaxScaler, is_keras=True)
+    model = LSTM(symbol, total_days, train_size, scaler=MinMaxScaler, is_keras=True, save_model=save_model)
 
 elif model_name == "SVM":
-    model = SVM(symbol, total_days, train_size, scaler=StandardScaler)
-
-elif model_name == "HMM":
-    model = HMM(symbol, total_days, train_size, save_model=False)
+    model = SVM(symbol, total_days, train_size, scaler=MinMaxScaler, save_model=save_model)
 
 else:
-    exit(0)
+    raise NotImplementedError
 
 # %%
-# if model.model: continue
-
 train_data = model.train_data
 
 if testing:
@@ -77,9 +70,10 @@ predictions
 predictions = Series(data=predictions, index=test_data.index[:len(predictions)])
 
 # %%
-save_predictions(
-    predictions, type(model).__name__, symbol, train_data.index.max().to_pydatetime()
-)
+if to_save_predictions:
+    save_predictions(
+        predictions, type(model).__name__, symbol, train_data.index.max().to_pydatetime()
+    )
 
 # %%
 fig, ax = plt.subplots(figsize=(10, 6))

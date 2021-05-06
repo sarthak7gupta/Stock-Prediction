@@ -1,3 +1,4 @@
+from helper import get_next_n_trading_days
 import numpy as np
 import pandas as pd
 from numpy import array
@@ -15,23 +16,17 @@ class SVM(BaseModel):
         X_train = X.reshape(-1, 1)
         y_train = y.reshape(-1, 1)
 
-        # X = self.train_data
-        # y = X.shift(-self.window)
-        # X_train = X.values.reshape(-1, 1)
-        # y_train = y.values.reshape(-1, 1)
-
-        self.model = SVR(
+        self.model = model = SVR(
             kernel="rbf",
-            C=1e6,
-            gamma=0.01
+            C=1e3,
+            verbose=True,
         )
-        self.model.fit(X_train, y_train)
+        model.fit(X_train, y_train)
 
     def make_predictions(self, n_days: int) -> array:
+        if not self.is_test_model:
+            self.test_data = pd.Series(index=get_next_n_trading_days(n_days), dtype="float64")
         X = np.array(pd.to_numeric(self.test_data.index))
         X_test = X.reshape(-1, 1)
-
-        # X = self.scaler.fit_transform(self.test_data.values.reshape(-1, 1))
-        # X_test = X.values.reshape(-1, 1)
 
         return self.model.predict(X_test)
