@@ -68,7 +68,7 @@ def get_strategy(
         df1 = preds.combine_first(df[["Close"]])
 
         kwargs = {
-            "data": df1[-investment_period:].dropna(),
+            "data": df1[-investment_period:].fillna(method="ffill"),
             "init_cash": initial_cash,
             "commission": commission_percentage,
             "allow_short": short_sell,
@@ -114,19 +114,21 @@ def get_strategy(
         max_trades = None
 
         for strategy, s_kwargs in strategies.items():
-            res, trades = backtest(strategy, **s_kwargs, **kwargs)
+            try:
+                res, trades = backtest(strategy, **s_kwargs, **kwargs)
 
-            net_pnl = res.pnl[0]
+                net_pnl = res.pnl[0]
 
-            if max_pnl < net_pnl:
-                max_pnl = net_pnl
-                max_res = res
-                max_trades = trades
-                max_strategy = strategy
+                if max_pnl < net_pnl:
+                    max_pnl = net_pnl
+                    max_res = res
+                    max_trades = trades
+                    max_strategy = strategy
+
+            except Exception:
+                pass
 
         if max_strategy:
-            print(max_res)
-            print(max_trades)
 
             final_trades = [{
                 "type": order['type'],

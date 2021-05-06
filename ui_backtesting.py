@@ -39,9 +39,28 @@ print()
 print("-" * 50)
 print()
 
-n_days = 100
+# %%
+init_cash = int(input("Initial Cash (₹): "))
+commission = float(input("Commission Percentage (%): ")) / 100
+allow_short = input("OK to Short Sell ? (y/n): ").lower() == "y"
+short_max = float(input("Maximum short position allowable relative to portfolio (x): "))
+period = int(input("Number of days to invest (days): "))
+# add_cash_freq = input("How often to add more cash (D/W/M/Y): ")
+# add_cash_amount = int(input("How much more cash (₹): "))
 
-df = get_stock_data(symbol, n_days)
+# init_cash = 100000
+# commission = 0.01
+# allow_short = True
+# short_max = 1.25
+# period = 150
+# add_cash_freq = "M"
+# add_cash_amount = 0
+# print(df1)
+# print()
+# print(df1[-period:].dropna())
+
+# %%
+df = get_stock_data(symbol, period)
 df.rename(
     columns={
         "open_price": "Open",
@@ -106,7 +125,7 @@ mpf.plot(
     type="candle",
     mav=(5, 15, 30, 50, 100, 200),
     returnfig=True,
-    title=f"{symbol}, {n_days} days",
+    title=f"{symbol}, {period} days",
     # addplot=[roc_plot],
     figratio=(12, 8),
     figscale=1.5,
@@ -117,12 +136,11 @@ mpf.plot(
 mpf.show()
 
 # %%
-next_n_trading_days = get_next_n_trading_days(n_days)
+next_n_trading_days = get_next_n_trading_days(period)
 # preds = get_predictions(symbol, df.index.min(), df.index.max(), model)
 preds = get_predictions(symbol, next_n_trading_days.min(), next_n_trading_days.max(), model).to_frame()
-df1 = df[["Close"]]
 
-df1 = preds.combine_first(df1)
+df1 = preds.combine_first(df[["Close"]])
 
 # # %%
 # sma5 = df.Close.rolling(window=5).mean()
@@ -158,27 +176,8 @@ df1 = preds.combine_first(df1)
 # df1.loc[SELL & 1, custom] = 1
 
 # %%
-init_cash = int(input("Initial Cash (₹): "))
-commission = float(input("Commission Percentage (%): ")) / 100
-allow_short = input("OK to Short Sell ? (y/n): ").lower() == "y"
-short_max = float(input("Maximum short position allowable relative to portfolio (x): "))
-period = int(input("Number of days to invest (days): "))
-# add_cash_freq = input("How often to add more cash (D/W/M/Y): ")
-# add_cash_amount = int(input("How much more cash (₹): "))
-
-# init_cash = 100000
-# commission = 0.01
-# allow_short = True
-# short_max = 1.25
-# period = 150
-# add_cash_freq = "M"
-# add_cash_amount = 0
-# print(df1)
-# print()
-# print(df1[-period:].dropna())
-
 kwargs = {
-    "data": df1[-period:].dropna(),
+    "data": df1[-period:].fillna(method="ffill"),
     "init_cash": init_cash,
     "commission": commission,
     "allow_short": allow_short,
@@ -235,36 +234,43 @@ max_strategy = None
 max_res = None
 
 for strategy, s_kwargs in strategies.items():
-    res = backtest(strategy, **s_kwargs, **kwargs)
+    try:
+        res = backtest(strategy, **s_kwargs, **kwargs)
 
-    net_pnl = res[0].pnl[0]
+        net_pnl = res[0].pnl[0]
 
-    print(strategy)
-    print(f"Net PnL: {net_pnl}")
-    print()
+        print(strategy)
+        print(f"Net PnL: {net_pnl}")
+        print()
 
-    if max_pnl < net_pnl:
-        max_pnl = net_pnl
-        max_res = res
-        max_strategy = strategy
+        if max_pnl < net_pnl:
+            max_pnl = net_pnl
+            max_res = res
+            max_strategy = strategy
+    except Exception:
+        pass
 
 print()
 
-for _, order in max_res[1]["orders"].iterrows():
+if max_strategy is not None:
+    for _, order in max_res[1]["orders"].iterrows():
+        print(
+            f"{order['type']} {abs(order['size'])} shares @ {order['price']:.2f} on {order['dt']}",
+            f"{order.value:.2f} Value. {order.commission:.2f} Commission. {order.pnl:.2f} P/L",
+            sep="\n"
+        )
+        print()
+
+    final_value = max_res[0].final_value[0]
+    final_capital = final_value - max_pnl
+
+    print()
     print(
-        f"{order['type']} {abs(order['size'])} shares @ {order['price']:.2f} on {order['dt']}",
-        f"{order.value:.2f} Value. {order.commission:.2f} Commission. {order.pnl:.2f} P/L",
+        f"Using {max_strategy} strategy",
+        f"Final Portfolio Value: {final_value:.2f}. {final_capital:.2f} Invested",
+        f"Max PnL: {max_pnl:.2f}. {(final_value - final_capital) / final_capital * 100:.2f}% return",
         sep="\n"
     )
-    print()
 
-final_value = max_res[0].final_value[0]
-final_capital = final_value - max_pnl
-
-print()
-print(
-    f"Using {max_strategy} strategy",
-    f"Final Portfolio Value: {final_value:.2f}. {final_capital:.2f} Invested",
-    f"Max PnL: {max_pnl:.2f}. {(final_value - final_capital) / final_capital * 100:.2f}% return",
-    sep="\n"
-)
+else:
+    print("Error")
